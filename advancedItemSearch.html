@@ -1,0 +1,385 @@
+
+<html lang="en">
+<head>
+<title>Advanced ebay Item Search</title>
+
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		 		
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<script src="http://getbootstrap.com/dist/css/bootstrap.css"></script>
+		<!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+		<!-- Latest compiled JavaScript -->
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<!-- jQuery validate library -->
+		<script src="http://jqueryvalidation.org/files/dist/jquery.validate.min.js"></script>
+		<script src="http://jqueryvalidation.org/files/dist/additional-methods.min.js"></script>
+
+		
+		
+		
+		
+<script>
+		function showDetail(name){
+			$("."+name).collapse('toggle');
+		}
+		function getPage(num){
+		        var data = {
+					"action": "test",
+					"pageNumber": num
+				};
+				data = $('form').serialize() + "&" + $.param(data);
+			
+			// jQuery AJAX call to PHP Script with JSON Return		
+		$.ajax({
+			type: "GET",
+			dataType: "json",
+			url: "advancedItemSearchTest.php", //Relative or absolute path to response.php file
+			data: data,
+			success: function(new_data) {
+			
+			$( ".container" ).hide();
+			$( ".the-return" ).html( "" );// clear all the contents first
+			if(new_data['ack'] != 'Success' || new_data['resultCount'] <= 0){
+				$( ".the-return" ).html( "<h2>No Results were found</h2>" );
+			}
+			else{
+				for ( var i = 0; i < new_data.itemCount; i++ ) {
+					var $media = $( '<div class = "media"></div>');
+					var $media_body = $( '<div class = "media-body"></div>');
+					var $a_class = $('<a class= "pull-left"></a>');
+					var $name = 'name' + i;
+					//<img class = "media-object" src =  alt = "Item Image" />
+					//<a href= "<?php echo $item->viewItemURL ?>"><?php echo $item->title ?></a>
+   
+					var $item = new_data['item'][i];
+					var $imageURL = $item['basicInfo']['galleryURL'];
+					var $price = $item['basicInfo']['convertedCurrentPrice']
+					var $title = '<a href = '+ $item['basicInfo']['viewItemURL']+ '>' + $item['basicInfo']['title'] + '</a>';
+					
+					var $image = '<img class = "media-object" src =' + $imageURL +'alt = "Item Image" style="width:96px;height:96px" data-toggle="modal" data-target="#myModal'+ $name +'"/>';// concatenating string must use+ for variable!!
+					var $modal = $('<div class="modal fade" id="myModal'+ $name +'" role="dialog"></div>');
+					var $modalDialog = $('<div class="modal-dialog"></div>');
+					var $modalContent = $('<div class="modal-content"></div>');
+					$modalContent.append($('<div class="modal-header"></div>').append('<h4 class="modal-title">'+$item['basicInfo']['title']+'</h4>'));
+					$modalContent.append($('<div class="modal-body"></div>').append('<img src='+$item['basicInfo']['pictureURLSuperSize']+' alt="Item image" style="width:512px;height:512px" align="middle">'));
+					$modalContent.append($('<div class="modal-footer"></div>').append('<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'));
+					$modalDialog.append($modalContent);
+					$modal.append($modalDialog);
+					
+					var $shippingCost = "(Free Shipping)";
+					if($item['basicInfo']['shippingServiceCost'] > 0){
+						$shippingCost = "(+$" + $item['basicInfo']['shippingServiceCost'] + ")";
+					}
+					$price = "<b>" + "Price:$" + $price + "</b>";
+					var $location = "<i>" + "Location:"+ $item['basicInfo']['location'] + "</i>";
+					var $topRated = "";
+					if($item['basicInfo']['topRatedListing']){
+						$topRated = '<img  src =' + 'http://cs-server.usc.edu:45678/hw/hw8/itemTopRated.jpg' +' alt = "Top Rated" style="width:32px;height:24px" />';
+					}
+					
+					var $collapse = $('<div class="collapse '+ $name +'"></div>');// 
+					var $ul = $('<ul class="nav nav-tabs"></ul>');
+					$ul.append($('<li class="active"><a data-toggle="tab" href="#basic'+ $name +'">Basic Info</a></li>'));
+					$ul.append($('<li><a data-toggle="tab" href="#seller'+ $name +'">Seller Info</a></li>'));
+					$ul.append($('<li><a data-toggle="tab" href="#shipping'+ $name +'">Shipping Info</a></li>'));
+					$collapse.append($ul);
+					var $tabContend = $('<div class="tab-content"></div>');
+					
+					var $basic = $('<div id="basic'+ $name +'" class="tab-pane fade in active"></div>');
+					
+					var $table = $('<tbody></tbody>');//$('<table class = "table table-striped" ></table>');
+					var $tr = $('<tr></tr>');
+					$tr.append('<td><b>Condition</b></td>' + '<td>'+$item['basicInfo']['conditionDisplayName']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Category Name</b></td>' + '<td>'+$item['basicInfo']['categoryName']+'</td>');
+					$table.append($tr);
+					$tabContend.append($basic.append($('<table class = "table table-striped" ></table>').append($table)));
+					
+					var $seller = $('<div id="seller'+ $name +'" class="tab-pane fade"></div>');
+					$table = $('<tbody></tbody>');//$('<table class = "table table-striped""></table>');
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>User name</b></td>' + '<td>'+$item['sellerInfo']['sellerUserName']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Feedback score</b></td>' + '<td>'+$item['sellerInfo']['feedbackScore']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Positive feedback</b></td>' + '<td>'+$item['sellerInfo']['positiveFeedbackPercent']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					var $storeName = 'N/A';
+					if($item['sellerInfo']['sellerStoreName']!=''){
+						$storeName = $item['sellerInfo']['sellerStoreName'];
+					}
+					$tr.append('<td><b>Store name</b></td>' + '<td>'+$storeName+'</td>');
+					$table.append($tr);
+					$tabContend.append($seller.append($('<table class = "table table-striped" ></table>').append($table)));
+					
+					var $shipping = $('<div id="shipping'+ $name +'" class="tab-pane fade"></div>');
+					
+					$table = $('<tbody></tbody>');//$('<table class = "table table-striped""></table>');
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Shipping type</b></td>' + '<td>'+$item['shippingInfo']['shippingType']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Handling time</b></td>' + '<td>'+$item['shippingInfo']['handlingTime']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					$tr.append('<td><b>Shipping locations</b></td>' + '<td>'+$item['shippingInfo']['shipToLocations']+'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					//&#10004(correct)  &#10008(wrong)
+					var $mark = "&#10008";
+					if($item['shippingInfo']['expeditedShipping']){
+						$mark = "&#10004";
+					}
+					$tr.append('<td><b>Expedited shipping</b></td>' + '<td>'+ $mark +'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					//&#10004(correct)  &#10008(wrong)
+					var $mark = "&#10008";
+					if($item['shippingInfo']['returnsAccepted']){
+						$mark = "&#10004";
+					}
+					$tr.append('<td><b>Return accepted</b></td>' + '<td>'+ $mark +'</td>');
+					$table.append($tr);
+					$tr = $('<tr></tr>');
+					//&#10004(correct)  &#10008(wrong)
+					var $mark = "&#10008";
+					if($item['shippingInfo']['oneDayShippingAvailable']){
+						$mark = "&#10004";
+					}
+					$tr.append('<td><b>One day shipping</b></td>' + '<td>'+ $mark +'</td>');
+					$table.append($tr);
+					$tabContend.append($shipping.append($('<table class = "table table-striped" ></table>').append($table)));
+					
+					$collapse.append($tabContend);					
+				
+					var $viewDetail= '<a onclick="showDetail(\'' + $name +'\')">View Detail</a>';//'+$name+'
+					$media.append($a_class.html( $image));
+					$media_body.append($collapse);
+					$media_body.prepend( '<font size="4">' + $title + '</font>' + '<br/>' + $price + $shippingCost + ' ' + $location  + ' ' +  $topRated  + ' ' + $viewDetail );
+					
+					$media.append($media_body);
+					
+					$media.appendTo( $( ".the-return" ) );
+					$modal.appendTo( $( ".the-return" ) );
+					
+				}
+				var $pagination = $('<div class = "pagination"></div>');
+				var $ul = $('<ul class="pagination"></ul>');
+				var $prev = num - 1;
+				if( num == 1){
+					$pagination.append($ul.append('<li class="disabled"><a href="#">' + '<<' + '</a></li>'));
+				}
+				else{
+					$pagination.append($ul.append('<li><a href="#' + $prev +'" onclick="getPage(' + $prev + ');">' + '<<' + '</a></li>'));
+				}
+				
+				for( var i = num; i < num+5; i++ ){
+					$pagination.append($ul.append('<li><a href="#' + i +'" onclick="getPage(' + i + ');">' + i + '</a></li>'));
+					
+				}
+				var $next = num + 1;
+				if( num == new_data['totalPages']){
+					$pagination.append($ul.append('<li class="disabled"><a href="#">' + '>>' + '</a></li>'));
+				}
+				else{
+					$pagination.append($ul.append('<li><a href="#' + $next +'" onclick="getPage(' + $next + ');">' + '>>' + '</a></li>'));
+				}
+				var $itemFrom = (num-1) * Number(new_data.itemCount) + 1;
+				var $itemTo = $itemFrom +  Number(new_data.itemCount) - 1;
+				var $resultNum = $( '<div class = "resultNum" ></div>').append( '<b><font size="5">'+$itemFrom +'-'+ $itemTo + ' items out of ' + new_data['resultCount'] +'</font></b>');
+				$resultNum.prependTo($( ".the-return" ));
+				$pagination.appendTo( $( ".the-return" ) );
+			}	
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				//alert('error: ' + textStatus + ': ' + errorThrown);
+			}
+		});
+		}
+		
+$(document).ready(function(){
+
+	$('form').validate({
+        rules: {
+            keyword: {		// should be name, not id!
+                required: true
+            },
+            priceLow: {
+				number: true,
+				digits: true
+			},
+			priceHigh: {
+				number: true,
+				digits: true		
+			},
+			shippingTime:{
+				number: true,
+				digits: true
+			}
+			
+        },
+		messages:{
+			keyword: {		// should be name, not id!
+                required: "Please enter a keyword"
+            },
+			priceLow: {
+				number: "Price should be a valid number",
+				digits: "Price should be a valid number",
+				min : "Minimum price cannot be below 0"			
+			},
+			priceHigh: {
+				number: "Price should be a valid number",
+				digits: "Price should be a valid number",
+				min : "Maximum price cannot	be less than minimum price or below	0"				
+			},
+			shippingTime:{
+				number:  "Max handling time should be a	valid digit",
+				digits:  "Max handling time should be a	valid digit",
+				min: "Max handling time should be greater than or equal to 1"
+			}
+			
+		},
+        highlight: function(element) {
+            $(element).closest('.form-group').addClass('has-error');
+        },
+        unhighlight: function(element) {
+            $(element).closest('.form-group').removeClass('has-error');
+        },
+        errorElement: 'span',
+        errorClass: 'help-block',
+        errorPlacement: function(error, element) {
+            if(element.parent('.input-group').length) {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+	
+	
+	$('form').submit(function(){
+		//var num = 1;
+		
+		getPage(1);
+		return false;
+	});
+}); // end document.ready
+	
+		
+</script>
+
+</head>
+
+<body>
+<style>
+.center_div{
+    margin: 0 auto;
+    width:80%;
+}
+</style>
+<div class = "container center_div" >
+	<img src = " http://cs-server.usc.edu:45678/hw/hw8/ebay.jpg" class="img-responsive"><br>
+	<form class = "form-horizontal" action = "advancedItemSearchTest.php" method="GET" role = "form" id = "myForm" accept-charset="utf-8">	
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="keyword">Key words:*</label>
+				<div class="col-sm-8">
+					<input type = "text" class="form-control" id = "keyword" name = "keyword" placeholder="Enter keyword">
+				</div>
+
+			</div>	
+			<div class = "form-group row">
+					<label class="control-label col-sm-2" for="priceLow">Price range:  </label>
+					<div class="col-sm-4">
+						<input type = "number" class="form-control" name = "priceLow" id = "priceLow" min="0" placeholder="from($)">
+					</div>
+					<label class="control-label " for="priceHigh">  </label>
+					<div class="col-sm-4">
+						<input type = "number" class="form-control" name = "priceHigh" id = "priceHigh" min="0" placeholder="to($)"> 
+					</div>
+			</div>
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="conditionNew">Condition:  </label>
+				<div class="col-sm-8">
+					<label class="checkbox-inline"><input type="checkbox" id = "conditionNew" name = "condition[]" value=1000>New</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "condition[]" value=3000>Used</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "condition[]" value=4000>Very Good</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "condition[]" value=3000>Good</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "condition[]" value=4000>Acceptable</label>
+				</div>
+			</div>
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="formats">Buying formats:  </label>
+				<div class="col-sm-8">
+					<label class="checkbox-inline"><input type="checkbox" id = "formats" name = "BuyFormat[]" value="FixedPrice">Buy It Now</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "BuyFormat[]" value="Auction">Auction</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "BuyFormat[]" value="Classified">Classified Ad</label>
+				</div>
+			</div>
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="sellers">Seller:  </label>
+				<div class="col-sm-8">
+					<div class="checkbox">					
+						<label><input type="checkbox" id = "sellers" name = "seller" value="true">Return accepted </label>				
+					</div>
+				</div>
+			</div>
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="shipping">Shipping:  </label>
+				<div class="col-sm-8">
+					<label class="checkbox-inline"><input type="checkbox" id = "shipping" name = "FreeShippingOnly" value="true">Free Shipping</label>
+					<label class="checkbox-inline"><input type="checkbox" name = "ExpeditedShippingType" value="Expedited">Expedited shipping</label>
+				</div>
+				
+			</div>
+			<div class = "form-group">
+				<label class="control-label col-sm-2" for="shippingTime">  </label>
+				<div class="col-sm-8">
+						<input type = "number" class="form-control" name = "shippingTime" id = "shippingTime" min="1"  placeholder="Max handling time(days)"> 
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="sort">Sort by:</label>
+				<div class="col-sm-8">
+					<select class="form-control" id="sort" name = "SortSelection">
+						<option value = "BestMatch">Best Match</option>
+						<option value = "CurrentPriceHighest">Price: highest first</option>
+						<option value = "CurrentPriceHighest">Price: lowest first</option>
+						<option value = "PricePlusShippingHighest">Price + Shipping: highest first</option>
+						<option value = "PricePlusShippingLowest">Price + Shipping: lowest first</option>
+					</select>
+				</div>
+			</div>	
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="results">Results Per Page::</label>
+				<div class="col-sm-8">
+					<select class="form-control" id="results" name = "ResultsNum">
+						<option value = 5 >5</option>
+						<option value = 10>10</option>
+						<option value = 15>15</option>
+						<option value = 20>20</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="form-group col-sm-10"	align="right">			
+				<input type="reset" class="btn btn-default" value="Clear" >
+				<input type="submit" class="btn btn-primary" value="Search">
+			</div>
+	</form>
+
+	
+</div>
+	<div class="the-return center_div">
+		
+	</div>
+	
+
+</body>
+</html>
