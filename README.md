@@ -4,6 +4,7 @@ Creat a webpage that allows users to search items for sale on eBay.com using the
 
 After validating the data that user enters, HTML file sends input data using jQuery AJAX call to the server with “GET” http request, and PHP script sends query with arguments to eBay API.
 PHP encodes the retrieved XML into JSON and sends back to HTML, and jQuery use the returned data reorganizing HTML contents for results display.
+
 ## Programming langueges/Libraries
 
 HTML, CSS, XML, XMLHttpRequest, PHP, Bootstrap, JQuery, AJAX, and JSON
@@ -27,3 +28,7 @@ HTML, CSS, XML, XMLHttpRequest, PHP, Bootstrap, JQuery, AJAX, and JSON
   3)	View detail using Bootstrap collapse;
   
   4)  Item image display using Bootstrap Modal.
+  
+## Video display
+
+https://www.youtube.com/watch?v=Xgen7RP_lS0
